@@ -76,7 +76,8 @@ void HdmiCec::get_physical_address(int dcctrl, uint8_t dispid) {
     char edid[512];
     struct tegra_dc_ext_control_output_edid dcedid = { dispid, sizeof(edid), edid };
 
-    if (ioctl(dcctrl, TEGRA_DC_EXT_CONTROL_GET_OUTPUT_EDID, &dcedid) == 0) {
+    if (ioctl(dcctrl, TEGRA_DC_EXT_CONTROL_GET_OUTPUT_EDID, &dcedid) == 0 && \
+        dcedid.size >= 5) {
         for (uint16_t i = 0; i < (dcedid.size - 5); i++) {
             if (edid[i] == 3 && edid[i+1] == 12 && edid[i+2] == 0) {
                 mPhysAddrMutex.lock();
