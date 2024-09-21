@@ -323,7 +323,12 @@ Return<SendMessageResult> HdmiCec::sendMessage(const CecMessage& message) {
     msg.insert(msg.end(), message.body.begin(), message.body.end());
 
     // If write returns an error, report a fail.
-    return (write(cecdev, msg.data(), msg.size()) >= 0 ? SendMessageResult::SUCCESS : SendMessageResult::FAIL);
+    if (write(cecdev, msg.data(), msg.size()) >= 0)
+        return SendMessageResult::SUCCESS;
+    else if (message.body.size() == 0) // Message is a poll, fw expects a NACK on fail
+        return SendMessageResult::NACK;
+    else
+        return SendMessageResult::FAIL;
 }
 
 Return<void> HdmiCec::setCallback(const sp<IHdmiCecCallback>& callback) {
